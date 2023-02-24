@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: "alveola_postgresql"
+    image: postgres:15.2
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PWD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - alveola_pgdata:/var/lib/postgresql/data/
+    ports:
+      - 5435:5432
+
+volumes:
+  alveola_pgdata:
