@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.pgsql.session import get_db
 from .service import ProjectService
-from .schemas import ProjectCreate, ProjectUpdate
+from .schemas import ProjectCreate, ProjectUpdate, ProjectRead
 
 router = APIRouter(
     prefix="/api/projects",
@@ -12,22 +12,34 @@ router = APIRouter(
 )
 
 
-@router.get("/{project_id}")
+@router.get("/{project_id}", response_model=ProjectRead)
 async def get_project(*, db_session: AsyncSession = Depends(get_db), project_id: int):
-    return await ProjectService.get_project(
+    """Get a project by the given id"""
+    project = await ProjectService.get_project(
         db_session=db_session, project_id=project_id
     )
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=[{"msg": "Project does not exist."}],
+        )
+    return project
 
 
 @router.post("/")
 async def create_project(
     *, db_session: AsyncSession = Depends(get_db), project_in: ProjectCreate
 ):
-    """Create a new project."""
-    project = await ProjectService.create_project(
-        db_session=db_session, project_in=project_in
+    """Create a new project by the given name"""
+    project = await ProjectService.get_project_by_name(
+        db_session=db_session, project_name=project_in.name
     )
-    return project
+    if project:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=[{"msg": f"Project({project_in.name}) already exists"}],
+        )
+    await ProjectService.create_project(db_session=db_session, project_in=project_in)
 
 
 @router.put("/")
@@ -35,23 +47,33 @@ async def update_project(
     *,
     db_session: AsyncSession = Depends(get_db),
     project_id: int,
-    project_in: ProjectUpdate
+    project_in: ProjectUpdate,
 ):
-    """
-    ToDo
-    1. Make it work without typing name by merge default project from project_id and project_in
-    2. Error handling
-    3. Return type processing
-    """
-    project = await ProjectService.update_project(
-        db_session=db_session, project_id=project_id, project_in=project_in
+    project = await ProjectService.get_project(
+        db_session=db_session, project_id=project_id
     )
-    return project
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=[{"msg": "Project does not exist."}],
+        )
+    updated_project = await ProjectService.update_project(
+        db_session=db_session, project=project, project_in=project_in
+    )
+    return updated_project
 
 
 @router.delete("/{project_id}")
 async def delete_project(
     *, db_session: AsyncSession = Depends(get_db), project_id: int
 ):
+    """Delete a project by the given id"""
+    project = await ProjectService.get_project(
+        db_session=db_session, project_id=project_id
+    )
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=[{"msg": "Project does not exist."}],
+        )
     await ProjectService.delete_project(db_session=db_session, project_id=project_id)
-    return

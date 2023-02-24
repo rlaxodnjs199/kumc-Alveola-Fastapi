@@ -2,14 +2,25 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-class ProjectBaseSchema(BaseModel):
+class ProjectBase(BaseModel):
     name: str
+    description: Optional[str]
+
+    class Config:
+        orm_mode = True
 
 
-class ProjectCreate(ProjectBaseSchema):
-    description: Optional[str] = Field(None, nullable=True)
+class ProjectCreate(ProjectBase):
+    pass
 
 
 class ProjectUpdate(BaseModel):
     name: Optional[str]
     description: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+
+class ProjectRead(ProjectBase):
+    pass

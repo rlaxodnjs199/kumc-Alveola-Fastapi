@@ -1,5 +1,6 @@
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from sqlalchemy import insert, update, delete
 
 from .models import Project
@@ -17,26 +18,35 @@ class ProjectService:
         return project
 
     @staticmethod
-    async def create_project(
-        *, db_session: AsyncSession, project_in: ProjectCreate
+    async def get_project_by_name(
+        *, db_session: AsyncSession, project_name: str
     ) -> Optional[Project]:
+        """Returns a project based on the project_name"""
+        result = await db_session.execute(
+            select(Project).where(Project.name == project_name)
+        )
+        await db_session.commit()
+        return result.scalar_one()
+
+    @staticmethod
+    async def create_project(*, db_session: AsyncSession, project_in: ProjectCreate):
         """Creates a project"""
         stmt = insert(Project).values(**project_in.dict())
-        project = await db_session.execute(stmt)
+        await db_session.execute(stmt)
         await db_session.commit()
-        return project
 
     @staticmethod
     async def update_project(
-        *, db_session: AsyncSession, project_id: int, project_in: ProjectUpdate
-    ) -> Optional[Project]:
+        *, db_session: AsyncSession, project: Project, project_in: ProjectUpdate
+    ):
         """Updateds a project"""
-        stmt = (
-            update(Project).where(Project.id == project_id).values(**project_in.dict())
-        )
-        project = await db_session.execute(stmt)
+        project_data = ProjectUpdate.from_orm(project).dict()
+        to_update = {k: v for k, v in project_in.dict().items() if v is not None}
+        project_data.update(to_update)
+
+        stmt = update(Project).where(Project.id == project.id).values(project_data)
+        await db_session.execute(stmt)
         await db_session.commit()
-        return project
 
     @staticmethod
     async def delete_project(*, db_session: AsyncSession, project_id: int):
