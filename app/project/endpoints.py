@@ -1,3 +1,4 @@
+from typing import Optional, List
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,6 +11,13 @@ router = APIRouter(
     tags=["project"],
     responses={404: {"description": "Not found"}},
 )
+
+
+@router.get("", response_model=List[Optional[ProjectRead]])
+async def get_all_projects(*, db_session: AsyncSession = Depends(get_db)):
+    """Get all projects"""
+    projects = await ProjectService.get_all_projects(db_session=db_session)
+    return projects
 
 
 @router.get("/{project_id}", response_model=ProjectRead)

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import insert, update, delete
@@ -8,6 +8,13 @@ from .schemas import ProjectCreate, ProjectUpdate
 
 
 class ProjectService:
+    @staticmethod
+    async def get_all_projects(*, db_session: AsyncSession) -> List[Optional[Project]]:
+        """Returns all projects"""
+        q = await db_session.execute(select(Project))
+        await db_session.commit()
+        return q.scalars().all()
+
     @staticmethod
     async def get_project(
         *, db_session: AsyncSession, project_id: int
@@ -22,11 +29,11 @@ class ProjectService:
         *, db_session: AsyncSession, project_name: str
     ) -> Optional[Project]:
         """Returns a project based on the project_name"""
-        result = await db_session.execute(
+        q = await db_session.execute(
             select(Project).where(Project.name == project_name)
         )
         await db_session.commit()
-        return result.scalar_one()
+        return q.one_or_none()
 
     @staticmethod
     async def create_project(*, db_session: AsyncSession, project_in: ProjectCreate):
@@ -39,7 +46,7 @@ class ProjectService:
     async def update_project(
         *, db_session: AsyncSession, project: Project, project_in: ProjectUpdate
     ):
-        """Updateds a project"""
+        """Updates a project"""
         project_data = ProjectUpdate.from_orm(project).dict()
         to_update = {k: v for k, v in project_in.dict().items() if v is not None}
         project_data.update(to_update)
