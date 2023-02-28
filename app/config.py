@@ -1,6 +1,9 @@
 import os
 from functools import lru_cache
-from pydantic import BaseSettings, Field, PostgresDsn
+
+from pydantic import BaseSettings
+from pydantic import Field
+from pydantic import PostgresDsn
 
 
 class Config(BaseSettings):
@@ -15,17 +18,14 @@ class DevConfig(Config):
 
 class ProdConfig(Config):
     class Config:
-        env_file = ".env.prod"
+        env_file = ".env"
         env_file_encoding = "utf-8"
 
 
 @lru_cache
 def get_config() -> Config:
     env = os.getenv("ENV")
-    if env == "prod":
-        return ProdConfig()
-    elif env == "dev":
-        return DevConfig()
+    return DevConfig() if env == "dev" else ProdConfig()
 
 
 config = get_config()

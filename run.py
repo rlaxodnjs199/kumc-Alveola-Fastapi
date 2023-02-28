@@ -1,5 +1,6 @@
 import os
 import sys
+
 import uvicorn
 
 if sys.argv[1] == "dev":

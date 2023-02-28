@@ -1,15 +1,22 @@
-from typing import Optional, List
+from typing import List
+from typing import Optional
+
+from sqlalchemy import delete
+from sqlalchemy import insert
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import insert, update, delete
 
 from .models import Project
-from .schemas import ProjectCreate, ProjectUpdate
+from .schemas import ProjectCreate
+from .schemas import ProjectUpdate
 
 
 class ProjectService:
     @staticmethod
-    async def get_all_projects(*, db_session: AsyncSession) -> List[Optional[Project]]:
+    async def get_all_projects(
+        *, db_session: AsyncSession
+    ) -> List[Optional[Project]]:
         """Returns all projects"""
         q = await db_session.execute(select(Project))
         await db_session.commit()
@@ -36,7 +43,9 @@ class ProjectService:
         return q.one_or_none()
 
     @staticmethod
-    async def create_project(*, db_session: AsyncSession, project_in: ProjectCreate):
+    async def create_project(
+        *, db_session: AsyncSession, project_in: ProjectCreate
+    ):
         """Creates a project"""
         stmt = insert(Project).values(**project_in.dict())
         await db_session.execute(stmt)
@@ -44,14 +53,23 @@ class ProjectService:
 
     @staticmethod
     async def update_project(
-        *, db_session: AsyncSession, project: Project, project_in: ProjectUpdate
+        *,
+        db_session: AsyncSession,
+        project: Project,
+        project_in: ProjectUpdate,
     ):
         """Updates a project"""
         project_data = ProjectUpdate.from_orm(project).dict()
-        to_update = {k: v for k, v in project_in.dict().items() if v is not None}
+        to_update = {
+            k: v for k, v in project_in.dict().items() if v is not None
+        }
         project_data.update(to_update)
 
-        stmt = update(Project).where(Project.id == project.id).values(project_data)
+        stmt = (
+            update(Project)
+            .where(Project.id == project.id)
+            .values(project_data)
+        )
         await db_session.execute(stmt)
         await db_session.commit()
 

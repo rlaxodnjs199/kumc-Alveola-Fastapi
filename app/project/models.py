@@ -1,7 +1,9 @@
 from typing import Optional
-from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.pgsql import Base
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+
+from app.db.pgsql.base import Base
 
 
 class Project(Base):

@@ -1,10 +1,17 @@
-from typing import Optional, List
-from fastapi import APIRouter, Depends, status, HTTPException
+from typing import List
+from typing import Optional
+
+from fastapi import APIRouter
+from fastapi import Depends
+from fastapi import HTTPException
+from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.pgsql.session import get_db
+from .schemas import ProjectCreate
+from .schemas import ProjectRead
+from .schemas import ProjectUpdate
 from .service import ProjectService
-from .schemas import ProjectCreate, ProjectUpdate, ProjectRead
+from app.db.pgsql.session import get_db
 
 router = APIRouter(
     prefix="/api/projects",
@@ -21,7 +28,9 @@ async def get_all_projects(*, db_session: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{project_id}", response_model=ProjectRead)
-async def get_project(*, db_session: AsyncSession = Depends(get_db), project_id: int):
+async def get_project(
+    *, db_session: AsyncSession = Depends(get_db), project_id: int
+):
     """Get a project by the given id"""
     project = await ProjectService.get_project(
         db_session=db_session, project_id=project_id
@@ -47,7 +56,9 @@ async def create_project(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=[{"msg": f"Project({project_in.name}) already exists"}],
         )
-    await ProjectService.create_project(db_session=db_session, project_in=project_in)
+    await ProjectService.create_project(
+        db_session=db_session, project_in=project_in
+    )
 
 
 @router.put("/")
@@ -57,6 +68,7 @@ async def update_project(
     project_id: int,
     project_in: ProjectUpdate,
 ):
+    """Updates a project data with given data"""
     project = await ProjectService.get_project(
         db_session=db_session, project_id=project_id
     )
@@ -84,4 +96,6 @@ async def delete_project(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=[{"msg": "Project does not exist."}],
         )
-    await ProjectService.delete_project(db_session=db_session, project_id=project_id)
+    await ProjectService.delete_project(
+        db_session=db_session, project_id=project_id
+    )
