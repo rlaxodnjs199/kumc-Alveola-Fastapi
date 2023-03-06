@@ -3,9 +3,9 @@ from typing import Optional
 
 from sqlalchemy import delete
 from sqlalchemy import insert
+from sqlalchemy import select
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 
 from .models import Project
 from .schemas import ProjectCreate

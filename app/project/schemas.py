@@ -1,6 +1,9 @@
+from typing import List
 from typing import Optional
 
 from pydantic import BaseModel
+
+from app.subject.schemas import SubjectRead
 
 
 class ProjectBase(BaseModel):
@@ -16,6 +19,7 @@ class ProjectCreate(ProjectBase):
 
 
 class ProjectUpdate(BaseModel):
+    id: Optional[int]
     name: Optional[str]
     description: Optional[str]
 
@@ -24,4 +28,4 @@ class ProjectUpdate(BaseModel):
 
 
 class ProjectRead(ProjectBase):
-    pass
+    subjects: List[Optional[SubjectRead]]

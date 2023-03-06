@@ -1,16 +1,21 @@
+from datetime import date
 from typing import Optional
-from sqlalchemy import Date, Float, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
+
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
 
 from app.db.pgsql.base import Base
 
 
 class Subject(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(unique=True)
-    mrn: Mapped[str] = mapped_column(unique=True)
-    birth_date: Mapped[Optional[Date]]
-    height: Mapped[Optional[Float]]
-    weight: Mapped[Optional[Float]]
-    gender: Mapped[Optional[Boolean]]
+    subj: Mapped[str] = mapped_column(unique=True)
+    study_id: Mapped[str]
+    mrn: Mapped[str]
+    birth_date: Mapped[Optional[date]]
+    height: Mapped[Optional[float]]
+    weight: Mapped[Optional[float]]
+    gender: Mapped[Optional[bool]]
     description: Mapped[Optional[str]]
+    project_id = mapped_column(ForeignKey("project.id"))

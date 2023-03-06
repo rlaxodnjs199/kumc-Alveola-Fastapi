@@ -43,7 +43,7 @@ async def get_project(
     return project
 
 
-@router.post("/")
+@router.post("")
 async def create_project(
     *, db_session: AsyncSession = Depends(get_db), project_in: ProjectCreate
 ):
@@ -61,7 +61,7 @@ async def create_project(
     )
 
 
-@router.put("/")
+@router.put("/{project_id}")
 async def update_project(
     *,
     db_session: AsyncSession = Depends(get_db),

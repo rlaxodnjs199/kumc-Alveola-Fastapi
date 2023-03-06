@@ -7,7 +7,7 @@ from alembic import context
 
 from app.config import DevConfig
 from app.db.pgsql.base import Base
-from .models import *
+from app.db.pgsql.migrations.models import Project, Subject
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
