@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .schemas import SubjectCreate
 from .schemas import SubjectRead
+from .schemas import SubjectUpdate
 from .service import SubjectService
 from app.db.pgsql.session import get_db
 
@@ -48,4 +49,42 @@ async def create_subject(
     """Create a new subject"""
     await SubjectService.create_subject(
         db_session=db_session, subject_in=subject_in
+    )
+
+
+@router.put("/{subject_id}")
+async def update_subject(
+    *,
+    db_session: AsyncSession = Depends(get_db),
+    subject_id: int,
+    subject_in: SubjectUpdate
+):
+    subject = await SubjectService.get_subject(
+        db_session=db_session, subject_id=subject_id
+    )
+    if not subject:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=[{"msg": "Subject does not exist."}],
+        )
+    updated_subject = await SubjectService.update_subject(
+        db_session=db_session, subject=subject, subject_in=subject_in
+    )
+    return updated_subject
+
+
+@router.delete("/{subject_id}")
+async def delete_subject(
+    *, db_session: AsyncSession = Depends(get_db), subject_id: int
+):
+    subject = await SubjectService.get_subject(
+        db_session=db_session, subject_id=subject_id
+    )
+    if not subject:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=[{"msg": "Subject does not exist."}],
+        )
+    await SubjectService.delete_subject(
+        db_session=db_session, subject_id=subject_id
     )
